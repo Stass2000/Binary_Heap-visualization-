@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='111.css' rel='stylesheet'>
+       <link href='222.css' >
+    <title>Heap Visualizer</title>
+
+    <style>
+
+      .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 3px;
+      }
+
+      .node text { font: 10px sans-serif; }
+
+      .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 5px;
+      }
+
+      #input {
+        float: middle;
+      }
+
+
+    </style>
+  </head>
+  <body>
+
+    <div id='input'>
+        <button id='remove' onclick='setTimeout(function(){heap.removeMax()},3000)'>Del Max</button>
+         <button id='remove' onclick='for(var i = 100; i >= 0; i--){heap.removeMax()}'>Clear</button>
+      <form onsubmit='heap.insert(); return false;'>
+        <input id='inputVal' type='number'  value='0' placeHolder='Please, input number'/>
+        <input class = "but" input type='submit' value='Insert'>
+            </form>
+        <form onsubmit='setDelay(); return false;'>
+        <input id='delayTime' type='number' value = 'inputVal' placeHolder='Input time (miliseconds)'/>
+        <input class = "but" input type='submit' value='Time animation'>
+        
+          
+      </form>
+        <button id='remove' onclick='for(var i = 100; i >= 0; i--){heap.removeMax()} for(var i = 40; i >= 0; i--){if (i == 0){heap.insert(32)} else heap.insert(i / 2)}'>Example 1</button>
+        <button id='remove' onclick='for(var i = 100; i >= 0; i--){heap.removeMax()} for(var i = 10; i >= -7; i--){if (i == -7){heap.insert(12)} else heap.insert(i)} '>Example 2</button>
+        <button id='remove' onclick='for(var i = 100; i >= 0; i--){heap.removeMax()} for(var i = 50; i >= 0; i--){if (i == 0){heap.insert(71)} else heap.insert(parseInt (i/3))} '>Example 3</button>
+      <br/>
+      <br/>
+        
+      
+     
+        
+    </div>
+    <div class='main'>
+    </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js'></script>
+    
+
+    <script>
+
+      /* * * * * Create Heap * * * * */
+
+      // <form onsubmit='setDelay(); return false;'>
+        //<input id='delayTime' type='number' placeHolder='milliseconds'/>
+        //<input class = "but" input type='submit' value='Time animation'>
+        var stepDelay = 500;
+      var setDelay = function() {
+        stepDelay = parseInt(document.getElementById('delayTime').value);
+          if (stepDelay > 5000){
+              stepDelay = 5000;
+          }
+          if (stepDelay < 50){
+              stepDelay = 50;
+          }
+        document.getElementById('delayTime').value = '';
+        duration = 0.75*stepDelay;
+      }
+
+      //</form>Set animation delay time
+        var rangeSlider = function(){
+  var slider = $('.range-slider'),
+      range = $('.range-slider__range'),
+      value = $('.range-slider__value');
+    
+  slider.each(function(){
+
+    value.each(function(){
+      var value = $(this).prev().attr('value');
+      $(this).html(value);
+    });
+
+    range.on('delayTime', function(){
+      $(this).next(value).html(this.value);
+    });
+  });
+};
+
+
+      
+      // Create Heap constructor
+      var Heap = function() {
+        this.storage = [];
+      };
+        
+        var Heap1 = function() {
+        this.storage1 = [];
+      };
+        
+        Heap1.prototype.insert = function(value) {
+
+        // Grab value from form if not provided
+        if (value === undefined) {
+          value = parseInt(document.getElementById('inputVal').value);
+          document.getElementById('inputVal').value = '';
+        }
+
+        // Push to storage array
+        this.storage1.push(value);
+
+        // Update visualization based on added node
+        insertNode(value);
+
+        var that = this;
+
+        // Recursive function to handle swaps, input index
+        var reheapify = function(index) {
+
+          // Get parent index
+          var parentInd = Math.ceil(index/2-1);
+          // Base Case : value < parent or parent is null
+          if (parentInd < 0 || that.storage1[index] <= that.storage1[parentInd]) {
+            return 'value added to index '+index;
+          }
+          // Recursive Case: swap with parent and make recursive call
+          that.storage1[index] = that.storage1[index] ^ that.storage1[parentInd];
+          that.storage1[parentInd] = that.storage1[index] ^ that.storage1[parentInd];
+          that.storage1[index] = that.storage1[index] ^ that.storage1[parentInd];
+
+          // Update visualization based on swapped nodes
+          swapNodes(index, parentInd);
+
+          setTimeout(function(){
+            return reheapify(parentInd);
+          }, stepDelay);
+        };
+        setTimeout(function() {
+          return reheapify(that.storage1.length-1);
+        }, stepDelay);
+      };
+
+      // Heap insertion method on prototype
+    
+      Heap.prototype.insert = function(value) {
+
+        // Grab value from form if not provided
+        if (value === undefined) {
+            
+          value = parseInt(document.getElementById('inputVal').value);
+        if ( value > 10000) {
+            value = 9999
+        }
+            if ( value < -10000) {
+            value = -9999
+        }
+          if (value > -10000 && value < 10000) {
+              value = value;
+          }
+            else {
+                value = 0;
+            }
+          document.getElementById('inputVal').value = '';
+        } 
+     
+         
+        // Push to storage array
+        this.storage.push(value);
+
+        // Update visualization based on added node
+        insertNode(value);
+
+        var that = this;
+
+        // Recursive function to handle swaps, input index
+        var reheapify = function(index) {
+
+          // Get parent index
+          var parentInd = Math.ceil(index/2-1);
+          // Base Case : value < parent or parent is null
+          if (parentInd < 0 || that.storage[index] <= that.storage[parentInd]) {
+            return 'value added to index '+index;
+          }
+          // Recursive Case: swap with parent and make recursive call
+          that.storage[index] = that.storage[index] ^ that.storage[parentInd];
+          that.storage[parentInd] = that.storage[index] ^ that.storage[parentInd];
+          that.storage[index] = that.storage[index] ^ that.storage[parentInd];
+
+          // Update visualization based on swapped nodes
+          swapNodes(index, parentInd);
+
+          setTimeout(function(){
+            return reheapify(parentInd);
+          }, stepDelay);
+        };
+        setTimeout(function() {
+          return reheapify(that.storage.length-1);
+        }, stepDelay);
+      };
+        
+        
+            Heap.prototype.insert0 = function() {
+        var val = 0;
+        Heap.prototype.insert(1);
+    };
+        
+        Heap.prototype.insert1 = function() {
+            var value = 1;
+            if(value != 0) {
+        // Push to storage array
+        this.storage.push(value);
+
+        // Update visualization based on added node
+        insertNode(value);
+
+        var that = this;
+
+        // Recursive function to handle swaps, input index
+        var reheapify = function(index) {
+
+          // Get parent index
+          var parentInd = Math.ceil(index/2-1);
+          // Base Case : value < parent or parent is null
+          if (parentInd < 0 || that.storage[index] <= that.storage[parentInd]) {
+            return 'value added to index '+index;
+          }
+          // Recursive Case: swap with parent and make recursive call
+          that.storage[index] = that.storage[index] ^ that.storage[parentInd];
+          that.storage[parentInd] = that.storage[index] ^ that.storage[parentInd];
+          that.storage[index] = that.storage[index] ^ that.storage[parentInd];
+
+          // Update visualization based on swapped nodes
+          swapNodes(index, parentInd);
+        };
+       
+            var t = Heap.prototype.insert(value);
+            }
+      };
+
+        
+      // Heap clear method on prototype
+      // Remove the max value from a heap, reorder the heap, and return the max value
+        
+         Heap.prototype.clear = function() {
+            if (this.storage.length === 0) {
+          // If nothing to remove then return null
+          return null;
+        } else if (this.storage.length > 0 ) {
+         }
+             var removed = this.storage.pop();
+              restoreInitial();
+          return removed;
+         }
+         // Heap remove max method on prototype
+      // Remove the max value from a heap, reorder the heap, and return the max value
+      Heap.prototype.removeMax = function() {
+        // Check if heap is currently empty
+        if (this.storage.length === 0) {
+          // If nothing to remove then return null
+          return null;
+        } else if (this.storage.length === 1) {
+          // If heap only has one element in it then pop off the lone element in the storage array and return it
+          var removed = this.storage.pop();
+
+          // Reset inital state
+          restoreInitial();
+
+          return removed;
+        }
+
+        // Handle all other cases where heap has more than one node
+        // Preserve the max value in order to return it
+        var maxValue = this.storage[0];
+        // Replace the root node with the last node of the heap and remove the last node
+        this.storage[0] = this.storage.pop();
+
+        swapRoot();
+
+        // Preserve context for inner recursive helper function
+        var that = this;
+
+        // Recursive function to restore the heap property of the heap
+        var reheapify = function(index) {
+          // Set index of max value to current node's index
+          var maxIndex = index;
+
+          // Check first child node's value against current node
+          if ((2*index + 1 < that.storage.length) && (that.storage[2*index + 1] > that.storage[index])) {
+            // If greater then set index of max value to first child node's index
+            maxIndex = 2*index + 1;
+          }
+          // Check second child node's value against current max node
+          if ((2*index + 2 < that.storage.length) && (that.storage[2*index + 2] > that.storage[maxIndex])) {
+            // If greater then set index of max value to second child node's index
+            maxIndex = 2*index + 2;
+          }
+          // If the index of the max value is not equal to the index of the current node
+          // Then swap the nodes and reheapify at the new index of the current node
+          if (maxIndex !== index) {
+            // Swap node values
+            that.storage[index] = that.storage[index] ^ that.storage[maxIndex];
+            that.storage[maxIndex] = that.storage[index] ^ that.storage[maxIndex];
+            that.storage[index] = that.storage[index] ^ that.storage[maxIndex];
+
+            swapNodes(maxIndex, index);
+
+            // Reheapify at new index of current node
+            setTimeout(function() {
+              reheapify(maxIndex);
+            }, 10);
+          }
+        };
+
+        // Recursively move the swapped node down the heap until it's greater than both of its children
+        setTimeout(function() {
+          reheapify(0);
+        }, 10);
+
+        // Return the removed max value from the heap
+          return maxValue;
+          
+      };
+        
+        
+      // Instantiate heap
+      var heap = new Heap();
+        var heap1 = new Heap1();
+        
+
+      /* * * * * Visualize Heap * * * * */
+
+      // D3 code for tree visualization
+      var width = 2000,
+          height = 480;
+
+      var tree = d3.layout.tree()
+          .size([width - 100, height - 100]);
+
+      var root = {},
+          nodes = tree(root);
+
+      root.parent = root;
+      root.px = root.x;
+      root.py = root.y;
+
+      var diagonal = d3.svg.diagonal();
+
+      var svg = d3.select("body").append("svg")
+          .attr("width", width)
+          .attr("height", height)
+        .append("g")
+          .attr("transform", "translate(10,30)");
+
+      var initialNode = svg.selectAll(".node"),
+          node = initialNode,
+          link = svg.selectAll(".link");
+
+      var duration = 0.75*stepDelay;
+
+
+      // Restore to initial state
+      var restoreInitial = function() {
+        // Reset root and nodes to initial state
+        root = {};
+        nodes = tree(root);
+        root.parent = root;
+        root.px = root.x;
+        root.py = root.y;
+
+        // Remove node from DOM
+        animateSwap();
+
+        // Reset node to initial state
+        node = initialNode;
+      };
+
+
+      // Update the array of nodes for the d3 tree layout based on adding nodes during Heap methods
+      var insertNode = function(value) {
+        
+        if (nodes[0].value === undefined) {
+          // If first value is added to heap, modify root node
+          nodes[0].value = value;
+          nodes[0].id = 0;
+        } else {
+          // Add a new node to its parent in the heap.
+          var n = {id: nodes.length, value: value},
+              p = nodes[Math.ceil((nodes.length-2)/2)];
+          if (p.children) p.children.push(n); else p.children = [n];
+          nodes.push(n);
+        }
+
+        // Recompute the layout and data join.
+        node = node.data(tree.nodes(root), function(d) { return d.id; });
+        link = link.data(tree.links(nodes), function(d) { return d.source.id + "-" + d.target.id; });
+
+        var nodeEnter = node.enter().append('g')
+            .attr('class', 'node');
+
+        // Add entering nodes in the parent’s old position.
+        nodeEnter.append("circle")
+            .attr("r", 25)
+            .attr("cx", function(d) { return d.parent.px; })
+            .attr("cy", function(d) { return d.parent.py; });
+
+        // Add text to entering nodes
+        nodeEnter.append('text')
+            .attr("x", function(d) { return d.parent.px; })
+            .attr("y", function(d) { return d.parent.py; })
+            .attr('text-anchor', function(d) {
+              return d.children || d._children ? 'end' : 'start'; })
+            .text(function(d) { return d.value; })
+            .style('fill-opacity', 2);
+
+        // Add entering links in the parent’s old position.
+        link.enter().insert("path", ".node")
+            .attr("class", "link")
+            .attr("d", function(d) {
+              var o = {x: d.source.px, y: d.source.py};
+              return diagonal({source: o, target: o});
+            });
+
+        // Transition nodes and links to their new positions.
+        var t = svg.transition()
+            .duration(duration);
+
+        t.selectAll(".link")
+            .attr("d", diagonal);
+
+        t.selectAll("circle")
+            .attr("cx", function(d) { return d.px = d.x; })
+            .attr("cy", function(d) { return d.py = d.y; });
+
+        t.selectAll("text")
+            .attr("x", function(d) { return d.px = d.x; })
+            .attr("y", function(d) { return d.py = d.y; });
+      };
+
+
+      // Update the array of nodes for the d3 tree layout based on swapping during Heap methods
+      var swapNodes = function(index, parentInd) {
+
+        // Update nodes array
+        // Find nodes at index and parentInd
+        var current = nodes[index];
+        var parent = nodes[parentInd];
+
+        // Swap the x,y coordinates between node at index and node at parentInd
+        current.x = current.x ^ parent.x;
+        parent.x = current.x ^ parent.x;
+        current.x = current.x ^ parent.x;
+
+        current.px = current.px ^ parent.px;
+        parent.px = current.px ^ parent.px;
+        current.px = current.px ^ parent.px;
+
+        current.y = current.y ^ parent.y;
+        parent.y = current.y ^ parent.y;
+        current.y = current.y ^ parent.y;
+
+        current.py = current.py ^ parent.py;
+        parent.py = current.py ^ parent.py;
+        current.py = current.py ^ parent.py;
+
+        // Swap the depth between node at index and node at parentInd
+        current.depth = current.depth ^ parent.depth;
+        parent.depth = current.depth ^ parent.depth;
+        current.depth = current.depth ^ parent.depth;
+
+        // Reassign children
+        // Store non-index node child of parent (if it has one)
+        parent.children = parent.children || [];
+        var orphanIndex;
+        var parentOrphan = parent.children.filter(function(child, index) {
+          if (child.id !== current.id) orphanIndex = index;
+          return child.id !== current.id;
+        });
+        // Store current children for assigning correct parent
+        var currentOrphans = current.children || [];
+        // Assign parentInd node the children of index node
+        parent.children = current.children;
+        // Assign parentInd node and its child (that isn't the index node) as the child of index node
+        current.children = [parent];
+        if (orphanIndex !== undefined) {
+          current.children.splice(orphanIndex, 0, parentOrphan[0]);
+        }
+        // For grandParent's children, overwrite parent with current
+        parent.parent.children = parent.parent.children || [];
+        parent.parent.children.forEach(function(child, i, children) {
+          if (child.id === parent.id) {
+            children[i] = current;
+          }
+        });
+
+        // Reassign parents
+        // Assign parent of parentInd node as parent of index node
+        current.parent = parent.parent === parent ? current : parent.parent;
+        // Assign index node as the parent of parentInd node
+        parent.parent = current;
+        // Assign parent of parentOrphan node as index node
+        parentOrphan.forEach(function(child) {
+          child.parent = current;
+        });
+        // Assign parent of currentOrphans as parent node
+        currentOrphans.forEach(function(child) {
+          child.parent = parent;
+        });
+
+
+        // Swap actual nodes in nodes array
+        var temp = nodes[index];
+        nodes[index] = nodes[parentInd];
+        nodes[parentInd] = temp;
+
+        // Update root if one of the swapped nodes was at index zero of the nodes array
+        if (index === 0 || parentInd === 0) {
+          root = nodes[0];
+          root.parent = root;
+          root.px = root.x;
+          root.py = root.y;
+        }
+
+        // Animate the swapping of the nodes
+        animateSwap();
+      };
+
+
+      // For removeMax move last node to root
+      var swapRoot = function() {
+        // Take last node and make root (put in nodes[0])
+        var newRoot = nodes.pop();
+        var oldRoot = nodes[0];
+        nodes[0] = newRoot;
+        root = newRoot;
+        // Update x,y,px,py,depth
+        newRoot.x = oldRoot.x;
+        newRoot.y = oldRoot.y;
+        newRoot.px = oldRoot.px;
+        newRoot.py = oldRoot.xpy
+        newRoot.depth = oldRoot.depth;
+        // Update parents and children for new root
+        oldRoot.children.forEach(function(child) {
+          child.parent = newRoot;
+        });
+        newRoot.children = oldRoot.children;
+        newRoot.parent.children = newRoot.parent.children.filter(function(child) {
+          return child.id !== newRoot.id;
+        });
+        newRoot.parent = newRoot;
+        newRoot.px = newRoot.x;
+        newRoot.py = newRoot.y;
+        
+        // Animate
+        animateSwap();
+      };
+
+      // Perform animation of swapping of nodes and re-establishing links between swapped nodes
+      var animateSwap = function() {
+
+        // remove exit nodes
+        node = node.data(tree.nodes(root), function(d) { return d.id; });
+        node.exit().remove();
+
+        // Recompute links between nodes post swapping
+        link = link.data(tree.links(nodes), function(d) { return d.source.id + "-" + d.target.id; });
+        
+        // Add entering links
+        link.enter().insert("path", ".node")
+            .attr("class", "link")
+            .attr("d", function(d) {
+              var o = {x: d.source.px, y: d.source.py};
+              return diagonal({source: o, target: o});
+            });
+        
+        // Remove exit links
+        link.exit().remove();
+
+        // Transition nodes and links to new positions
+        var t = svg.transition()
+            .duration(duration);
+
+        t.selectAll(".link")
+            .attr("d", diagonal);
+
+        t.selectAll("circle")
+            .attr("cx", function(d) { return d.px = d.x; })
+            .attr("cy", function(d) { return d.py = d.y; });
+
+        t.selectAll("text")
+            .attr("x", function(d) { return d.px = d.x; })
+            .attr("y", function(d) { return d.py = d.y; });
+      };
+
+    </script>
+
+
+
+  </body>
+</html>
