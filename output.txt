@@ -1,1 +1,17 @@
-Nepravelnyi vvod
+6 
+4 4 
+1 -6 3 
+6 
+4 4 
+1 -6 3 2 
+
+Max element 6
+7 
+2 4 
+1 -6 3 4 
+
+Max element 7
+4 
+2 4 
+1 -6 3 
+
